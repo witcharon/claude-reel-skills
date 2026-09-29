@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>FILM</title>
+<style>
+@font-face{font-family:Inter;src:url(node_modules/@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2) format('woff2');font-weight:100 900;font-style:normal}
+@font-face{font-family:Inter;src:url(node_modules/@fontsource-variable/inter/files/inter-latin-opsz-italic.woff2) format('woff2');font-weight:100 900;font-style:italic}
+@font-face{font-family:'JetBrains Mono';src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2) format('woff2');font-weight:500}
+html,body{margin:0;background:#000}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;font-family:Inter,sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
+.full{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#cam{transform-origin:540px 960px}
+#cam>img{position:absolute;left:0;top:0;width:1080px;height:1920px}
+/* kinetic type: centred on the frame; inside the right-button band keep lines within x 190-890 */
+.title{position:absolute;left:0;width:1080px;text-align:center;font-style:italic;font-weight:900;font-variation-settings:'opsz' 32;letter-spacing:-.055em;line-height:.9;white-space:nowrap}
+.title .ln{display:block}
+.title .w{display:inline-block;padding:0 .045em}
+.title .w+.w{margin-left:.17em}
+.ink{color:#0b0b0c;text-shadow:0 0 40px rgba(255,255,255,.4)}
+.paper{color:#fff;text-shadow:0 6px 44px rgba(0,0,0,.45),0 2px 10px rgba(0,0,0,.3)}
+#flash{background:#fff;opacity:0}
+#vig{background:radial-gradient(ellipse 80% 70% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.34) 100%)}
+#grain{mix-blend-mode:overlay;opacity:.14}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam" class="full"><img id="plate"></div>
+  <div class="title paper" style="top:900px;font-size:96px" data-out="2.2">
+    <span class="ln"><span class="w" data-at=".3">first</span><span class="w" data-at=".45">line.</span></span>
+  </div>
+  <div id="flash" class="full"></div>
+  <div id="vig" class="full"></div>
+  <canvas id="grain" class="full" width="540" height="960"></canvas>
+</div>
+<script type="module">
+import { clamp, springP, track, snap, bindTitles, css, shake, grain, setImg, plateIndex } from './lib/motion.js';
+
+const meta = await (await fetch('plates/meta.json')).json();
+const FPS = meta.fps, N = meta.frames.length;
+const T = { end: N / FPS };                       // story beats live here, on the grid
+const HITS = [];                                  // [[t, px, decay], ...] camera impulses
+const drawTitles = bindTitles(document);
+const $ = id => document.getElementById(id), plate = $('plate');
+
+window.renderAt = async t => {
+  const n = plateIndex(t, FPS, N), fr = meta.frames[n];
+  plate.style.display = fr.plate ? 'block' : 'none';
+  if (fr.plate) await setImg(plate, `plates/p_${String(n).padStart(4, '0')}.jpg`);
+  const sh = shake(t, HITS, FPS);
+  css($('cam'), { transform: `translate(${sh.x}px,${sh.y}px) rotate(${sh.r}deg)` });
+  drawTitles(t);
+  grain($('grain'), n);
+};
+await document.fonts.ready;
+await Promise.all(['italic 900 100px Inter', '500 30px "JetBrains Mono"'].map(f => document.fonts.load(f)));
+await window.renderAt(0);
+window.ready = true;
+</script>
+</body>
+</html>

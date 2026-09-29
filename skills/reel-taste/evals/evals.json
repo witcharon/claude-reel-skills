@@ -1,0 +1,49 @@
+{
+  "skill_name": "reel-taste",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Lidlezz için yeni reel fikirleri lazım. (Lidlezz: Mac'in kapağı kapalıyken Claude Code çalışmaya devam etsin diye Mac'i uyanık tutan, iş bitince de uyutan bir macOS uygulaması.) Ama artık extreme spor ve kesmeyi karanlıkta gizleme numarası olmasın, bunları çok kullandık: paraşüt, Everest, safari, F1, uzay, 'Mac'in gözünden' çanta videosu yaptık. 4 farklı fikir ver, en iyisini seç ve Seedance prompt'u + motion notlarını yaz. 20 sn civarı olabilir.",
+      "expected_output": "4 distinct concepts outside extreme sports and darkness cuts, a recommendation, and a full script package (single Seedance prompt, motion notes table, checks, caption).",
+      "files": [],
+      "assertions": [
+        "Gives exactly four distinct concepts before picking one",
+        "No concept uses an extreme sport or dangerous exotic location as its setting",
+        "The chosen script does not hide its cuts in darkness",
+        "The Seedance prompt is a single English code block with timestamped physical actions and an AVOID line",
+        "Motion notes are given as a table with time, picture, on-screen and sound columns",
+        "The chosen script does not reuse devices already spent in the series (Nolan title card, logo behind the subject, nature-made logo)",
+        "The script does not show a product feature it cannot back up (e.g. a 'Claude Code finished' notification), or it flags the uncertainty",
+        "Includes a caption with a comment-keyword CTA"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Arkadaşımın bir odak uygulaması var, adı 'Hush'. Mac'te odak modunu açınca bütün bildirimleri kapatıyor, Slack dahil, ve odak süresi bitince hepsini tek özet halinde gösteriyor. TikTok için dikkat çekici bir video lazım, Seedance ile üretip üstüne motion yapacağız. Fikirleri ve seçtiğin için tam senaryoyu yaz.",
+      "expected_output": "Several varied concepts for a different product, a pick, and a buildable script package.",
+      "files": [],
+      "assertions": [
+        "Offers at least three concepts from clearly different genres",
+        "In the chosen script the product's own action (notifications silenced, then one summary) is the story's turning point",
+        "The Seedance prompt is a single English code block with timestamped physical actions and an AVOID line",
+        "Motion notes are given as a table with time, picture, on-screen and sound columns",
+        "Text placement accounts for platform safe zones (top/bottom UI and right-hand buttons)",
+        "Includes a caption with a CTA"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Faturaları ve fişleri fotoğrafından okuyup muhasebeye işleyen bir uygulama yapıyoruz, adı 'Fişle'. Türkiye'deki esnaf ve serbest çalışanlara Reels açacağız. Ekran yazıları Türkçe olacak, sesi kapalı izleyenler de anlamalı, 15 saniye. Bir konsept ve tam script + caption istiyorum.",
+      "expected_output": "One strong concept that reads with sound off, Turkish on-screen copy, 15 s Seedance prompt in English, motion notes, caption.",
+      "files": [],
+      "assertions": [
+        "On-screen copy is written in Turkish",
+        "The Seedance prompt is written in English",
+        "Planned footage length is about 15 seconds",
+        "The story is understandable with the sound off (on-screen text and visuals carry it)",
+        "Text placement accounts for platform safe zones (top/bottom UI and right-hand buttons)",
+        "Includes a caption with a CTA"
+      ]
+    }
+  ]
+}
