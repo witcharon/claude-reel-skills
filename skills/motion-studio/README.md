@@ -11,7 +11,7 @@ motion-studio builds the motion layer of a short film on top of a generated take
 
 ## How it works
 
-A film is an HTML page with `window.renderAt(t)` that paints the exact frame for any moment. `scripts/render.mjs` drives it in headless Chromium, frame by frame, and pipes the frames into ffmpeg. It uses VideoToolbox on Apple Silicon and libx264 elsewhere. Every frame is a pure function of time, so any fix is an edit plus a re-render, and Claude can look at whatever it made.
+A film is an HTML page with `window.renderAt(t)` that paints the exact frame for any moment. `scripts/render.mjs` drives it in headless Chromium with several pages in parallel and pipes the frames, in order, into ffmpeg; a render that fails or comes up short exits non-zero and leaves no file. It uses VideoToolbox on Apple Silicon and libx264 elsewhere. Every frame is a pure function of time, so any fix is an edit plus a re-render, and Claude can look at whatever it made.
 
 The pipeline in `SKILL.md`:
 1. Brief
@@ -39,7 +39,7 @@ The best brief is a **[reel-taste](../reel-taste)** package: the video-model pro
 - `scripts/`:
   - `ingest.py`, `plates.py`: the take, the retime and the graded plates;
   - `track_screen.py`, `keys.py`: screens, hands, hue keys, horizons;
-  - `audio_kit.py`, `beats.py`, `mux.py`: the sound kit, beat measurement, two-pass loudnorm;
+  - `audio_kit.py`, `beats.py`, `mux.py`: the sound kit, beat measurement, a true-peak-safe master to −15 LUFS that verifies itself;
   - `render.mjs`, `qc.py`: the renderer and the looking tools.
 - `references/`: `doctrine.md` (how things move), `footage.md` (working on generated takes), `sound.md`, `critique.md`.
 

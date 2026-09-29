@@ -175,7 +175,8 @@ class Kit:
         c0 = int(t * self.SR); cut = np.ones(self.N); cut[c0:] = 0; cut[max(0, c0 - int(.004 * self.SR)):c0] = np.linspace(1, 0, min(c0, int(.004 * self.SR)))
         return x * cut
     def finish(self, mix, path, fade=.8, headroom=1.7, sections=()):
-        """High-pass, DC, fade out, soft-limit, write 16-bit WAV. Final loudness is set by mux.py (two-pass loudnorm)."""
+        """High-pass, DC, fade out, soft-limit, write 16-bit WAV. The soft limit is on sample peaks, so the true peak can pass 0 dBFS
+        on transient-heavy mixes; mux.py sets the final loudness and enforces the true-peak ceiling."""
         mix = self.filt(mix, 'highpass', 28); mix -= mix.mean(axis=1, keepdims=True)
         nf = int(fade * self.SR); mix[:, -nf:] *= np.linspace(1, 0, nf) ** 2
         mix /= np.abs(mix).max() / headroom; mix = np.tanh(mix) / np.tanh(headroom) * 10 ** (-1 / 20)

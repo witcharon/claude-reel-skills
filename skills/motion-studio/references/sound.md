@@ -17,6 +17,6 @@ Sound is where code video starts feeling like a film. Build it on the picture's 
 - **Sidechain.** Duck pads and bass under a four-on-the-floor kick (`sidechain`).
 
 ## Levels
-- `finish()` soft-limits and writes the WAV; `mux.py` sets the final loudness with a two-pass loudnorm to −15 LUFS integrated and −1.5 dBTP.
+- `finish()` soft-limits and writes the WAV; `mux.py` sets the final loudness (−15 LUFS integrated) under a true-peak ceiling (−1.5 dBTP) with an oversampled limiter, and verifies both after the AAC encode. Clicky, punchy mixes overshoot most in AAC (~1 dB); it lowers the ceiling and recalibrates by itself.
 - Print section RMS/peaks (`sections=`) to check the dynamics you meant: inside vs. outside, silence vs. hit.
 - You cannot listen. Say so, and ask the user to listen once on headphones before posting.

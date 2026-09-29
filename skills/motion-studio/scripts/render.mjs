@@ -1,12 +1,18 @@
-// Frame-exact renderer: serves the film folder, drives window.renderAt(t) in headless Chromium and pipes PNGs to ffmpeg.
+// Frame-exact renderer: serves the film folder, drives window.renderAt(t) in headless Chromium and pipes frames to ffmpeg.
 // Motion blur: --sub N renders N subframes per frame across the shutter and ffmpeg averages them (tmix).
 //
 //   node render.mjs --root <film dir> --page edit.html --fps 24 --from 0 --to 31.5 --sub 4 --shutter .5 --out out/video.mp4
 //   node render.mjs --root <film dir> --stills 1.2,5.5,18.9          -> out/stills/still-<t>.png
+//
+// Speed: capture is nearly all the cost, so frames are captured through CDP (Page.captureScreenshot, optimizeForSpeed)
+// by --workers pages in parallel (default: half the CPU cores, at most 6), each in its own context, and written to
+// ffmpeg in order. --capture jpeg is faster still (quality 95) at a tiny cost before the final encode.
+// Safety: each capture has a timeout and retries; the encode goes to <out>.partial.mp4 and only becomes <out> after
+// ffprobe counts the expected frames. Any failure exits non-zero and leaves no file at <out>.
 // Encoder: the Apple Media Engine (h264_videotoolbox, --bitrate 24M) when a test encode proves it works on this machine,
 // otherwise libx264 on the CPU. Force one with --encoder videotoolbox | x264.
 //
-// The page must set window.ready = true when loaded and expose async window.renderAt(t).
+// The page must set window.ready = true when loaded and expose async window.renderAt(t) as a pure function of time.
 // Playwright is resolved from the film dir's node_modules (or set NODE_PATH).
 import http from 'node:http';
 import fs from 'node:fs';
@@ -29,6 +35,10 @@ const FROM = Number(args.from ?? 0), TO = Number(args.to ?? 10);
 const [VW, VH] = (args.size ?? '1080x1920').split('x').map(Number);
 const OUT = path.resolve(ROOT, args.out ?? 'out/video.mp4');
 const STILLS = args.stills ? String(args.stills).split(',').map(Number) : null;
+const WORKERS = STILLS ? 1 : Math.max(1, Number(args.workers ?? Math.min(6, Math.floor(os.cpus().length / 2))));
+const CAPTURE = !STILLS && args.capture === 'jpeg' ? 'jpeg' : 'png';   // stills are always PNG
+const TIMEOUT = Number(args.timeout ?? 90) * 1000, RETRIES = 3;
+
 function pickEncoder() {
   if (args.encoder) return args.encoder;
   if (process.platform !== 'darwin') return 'x264';
@@ -68,43 +78,105 @@ const server = http.createServer((req, res) => {
   });
 }).listen(0);
 
-const browser = await chromium.launch({ executablePath: findChromium(), args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist', '--force-color-profile=srgb'] });
-const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: Number(args.scale ?? 1) });
-page.on('pageerror', e => console.log('[pageerror]', e.message));
-page.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) console.log('[page]', m.text()); });
-await page.goto(`http://localhost:${server.address().port}/${PAGE}`);
-await page.waitForFunction(() => window.ready === true, null, { timeout: 60000 });
-const time = { render: 0, capture: 0, encode: 0 };           // where the wall time goes
-const shot = async t => {
-  const a = performance.now(); await page.evaluate(t => window.renderAt(t), t);
-  const b = performance.now(); const png = await page.screenshot({ type: 'png' });
-  time.render += b - a; time.capture += performance.now() - b; return png;
-};
+const withTimeout = (p, ms, what) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(`${what} timed out after ${ms / 1000} s`)), ms))]);
+const time = { render: 0, capture: 0, encode: 0 };           // summed over workers: where the time goes
 
-if (STILLS) {
-  const dir = path.join(ROOT, 'out/stills'); fs.mkdirSync(dir, { recursive: true });
-  for (const t of STILLS) fs.writeFileSync(path.join(dir, `still-${t.toFixed(2)}.png`), await shot(t));
-  console.log(`stills -> ${dir}`);
-} else {
-  fs.mkdirSync(path.dirname(OUT), { recursive: true });
-  const vf = SUB > 1 ? `tmix=frames=${SUB},select='eq(mod(n\\,${SUB})\\,${SUB - 1})',setpts=N/${FPS}/TB,` : '';
-  const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS * SUB), '-i', '-',
-    '-vf', `${vf}scale=${VW}:${VH}:flags=lanczos,format=yuv420p`, '-r', String(FPS), ...VCODEC,
-    '-movflags', '+faststart', OUT], { stdio: ['pipe', 'inherit', 'inherit'] });
-  console.log(`encoder: ${ENCODER}`);
-  const frames = Math.round((TO - FROM) * FPS), t0 = Date.now();
-  for (let i = 0; i < frames; i++) {
-    for (let j = 0; j < SUB; j++) {
-      const buf = await shot(FROM + (i + (SUB > 1 ? j / SUB * SHUTTER : 0)) / FPS);
-      const c = performance.now();
-      if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
-      time.encode += performance.now() - c;
+async function openWorker(browser) {
+  const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: Number(args.scale ?? 1) });
+  const page = await ctx.newPage();
+  page.on('pageerror', e => console.log('[pageerror]', e.message));
+  page.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) console.log('[page]', m.text()); });
+  await page.goto(`http://localhost:${server.address().port}/${PAGE}`);
+  await page.waitForFunction(() => window.ready === true, null, { timeout: 60000 });
+  const cdp = await ctx.newCDPSession(page);
+  const shot = async t => {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const a = performance.now(); await withTimeout(page.evaluate(t => window.renderAt(t), t), TIMEOUT, `renderAt(${t})`);
+        const b = performance.now();
+        const { data } = await withTimeout(cdp.send('Page.captureScreenshot', {
+          format: CAPTURE, ...(CAPTURE === 'jpeg' ? { quality: 95 } : {}), optimizeForSpeed: true, fromSurface: true, captureBeyondViewport: false,
+        }), TIMEOUT, `capture at ${t}`);
+        time.render += b - a; time.capture += performance.now() - b;
+        return Buffer.from(data, 'base64');
+      } catch (e) {
+        if (attempt >= RETRIES) throw e;
+        console.log(`[retry ${attempt}] ${e.message}`);
+      }
     }
-    if (i % FPS === 0) console.log(`frame ${i}/${frames}  ${((Date.now() - t0) / (i + 1) / 1000).toFixed(2)} s/frame`);
-  }
-  const f0 = performance.now(); ff.stdin.end(); await new Promise(r => ff.on('close', r)); time.encode += performance.now() - f0;
-  const wall = (Date.now() - t0) / 1000, pct = v => `${(v / 10 / wall).toFixed(0)}%`;
-  console.log(`video -> ${OUT}`);
-  console.log(`time: ${wall.toFixed(1)} s wall, ${(wall / frames).toFixed(2)} s/frame (${SUB} subframes) | page render ${pct(time.render)}, capture ${pct(time.capture)}, waiting on encoder ${pct(time.encode)} | encoder ${ENCODER}`);
+  };
+  return { ctx, shot };
 }
-await browser.close(); server.close();
+
+let browser, ff, exitCode = 0;
+const partial = OUT.replace(/(\.[a-z0-9]+)$/i, '.partial$1');
+try {
+  browser = await chromium.launch({ executablePath: findChromium(), args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist', '--force-color-profile=srgb'] });
+  const workers = await Promise.all(Array.from({ length: WORKERS }, () => openWorker(browser)));
+
+  if (STILLS) {
+    const dir = path.join(ROOT, 'out/stills'); fs.mkdirSync(dir, { recursive: true });
+    for (const t of STILLS) {
+      const buf = await workers[0].shot(t);
+      fs.writeFileSync(path.join(dir, `still-${t.toFixed(2)}.png`), buf);
+    }
+    console.log(`stills -> ${dir}`);
+  } else {
+    fs.mkdirSync(path.dirname(OUT), { recursive: true }); fs.rmSync(partial, { force: true });
+    const vf = SUB > 1 ? `tmix=frames=${SUB},select='eq(mod(n\\,${SUB})\\,${SUB - 1})',setpts=N/${FPS}/TB,` : '';
+    ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS * SUB), '-i', '-',
+      '-vf', `${vf}scale=${VW}:${VH}:flags=lanczos,format=yuv420p`, '-r', String(FPS), ...VCODEC,
+      '-movflags', '+faststart', partial], { stdio: ['pipe', 'inherit', 'inherit'] });
+    const ffDone = new Promise(r => ff.on('close', code => r(code)));
+    let ending = false, failRej;
+    const ffEarly = new Promise((_, rej) => ffDone.then(code => { if (!ending) rej(new Error(`ffmpeg exited early (code ${code})`)); }));
+    const failP = new Promise((_, rej) => { failRej = rej; });
+    ffEarly.catch(() => {}); failP.catch(() => {});
+    console.log(`encoder: ${ENCODER} | workers: ${WORKERS} | capture: ${CAPTURE}`);
+
+    const frames = Math.round((TO - FROM) * FPS), t0 = Date.now(), AHEAD = WORKERS * 3;
+    const slots = new Map();                                  // frame index -> {promise, resolve, reject}
+    const slot = i => { if (!slots.has(i)) { let res, rej; const p = new Promise((a, b) => { res = a; rej = b; }); p.catch(() => {}); slots.set(i, { p, res, rej }); } return slots.get(i); };
+    let next = 0, written = 0, failed = null;
+    const work = async w => {
+      while (!failed) {
+        while (next - written > AHEAD && !failed) await new Promise(r => setTimeout(r, 4));   // backpressure on memory
+        const i = next++; if (i >= frames) return;
+        try {
+          const bufs = [];
+          for (let j = 0; j < SUB; j++) bufs.push(await w.shot(FROM + (i + (SUB > 1 ? j / SUB * SHUTTER : 0)) / FPS));
+          slot(i).res(bufs);
+        } catch (e) { failed = e; slot(i).rej(e); failRej(e); }
+      }
+    };
+    const running = workers.map(work);
+    for (let i = 0; i < frames; i++) {
+      const bufs = await Promise.race([slot(i).p, ffEarly, failP]);
+      slots.delete(i);
+      const c = performance.now();
+      for (const buf of bufs) if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
+      time.encode += performance.now() - c; written++;
+      if (i % FPS === 0) console.log(`frame ${i}/${frames}  ${((Date.now() - t0) / (i + 1) / 1000).toFixed(2)} s/frame`);
+    }
+    await Promise.all(running);
+    ending = true; const f0 = performance.now(); ff.stdin.end(); const code = await ffDone; time.encode += performance.now() - f0;
+    if (code !== 0) throw new Error(`ffmpeg exited with code ${code}`);
+    // the file must hold every frame before it gets the real name
+    const probe = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', partial], { encoding: 'utf8' });
+    const got = parseInt(probe.stdout, 10);
+    if (got !== frames) throw new Error(`encoded ${got} frames, expected ${frames}`);
+    fs.renameSync(partial, OUT);
+    const wall = (Date.now() - t0) / 1000, busy = v => `${(v / 1000).toFixed(0)} s`;
+    console.log(`video -> ${OUT} (${frames} frames, ${(frames / FPS).toFixed(2)} s)`);
+    console.log(`time: ${wall.toFixed(1)} s wall, ${(wall / frames).toFixed(2)} s/frame (${SUB} subframes, ${WORKERS} workers) | worker time: page render ${busy(time.render)}, capture ${busy(time.capture)} | writing to encoder ${busy(time.encode)} | encoder ${ENCODER}`);
+  }
+} catch (e) {
+  exitCode = 1;
+  console.error(`render failed: ${e.message}`);
+  if (ff && ff.exitCode === null) ff.kill('SIGKILL');
+  fs.rmSync(partial, { force: true });
+} finally {
+  if (browser) await browser.close().catch(() => {});
+  server.close();
+}
+process.exit(exitCode);
