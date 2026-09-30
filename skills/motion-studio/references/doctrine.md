@@ -43,11 +43,11 @@ How things should move. Adapted from Movez's "How to build motion design studio 
 
 ## 4. Type
 
-- House style, to be swapped for the brand's own: display in Inter 900 italic, lowercase, tracking −0.055em, sentences ending with a period; UI/HUD in JetBrains Mono at real sizes.
+- Families, weights, case, tracking and colour come from the film's `style_guide.md` (`references/look.md`). This section only governs how type moves and sits.
 - Words enter one at a time on the beat: they rise on the `type` spring and sharpen from a small blur (`wordIn`), and they exit by accelerating away (`wordOut`) so a following cut hits peak velocity.
 - Cascades: a multi-word line uses `stagger(i, 0.06–0.14)`, heavier words taking longer steps. Never let every word land at once.
 - Three big-type moments per film at most. Whisper-size copy has its own power.
-- Black type on bright skies/walls, white with a soft shadow elsewhere. Measure centring; don't trust `left: 64px; width: 826px` tricks.
+- Contrast before style: dark type on bright grounds, light type on dark ones, and a shadow or plate only when the ground is busy. Measure centring; don't trust `left: 64px; width: 826px` tricks.
 - Letter cascades: wrap each letter in an inline-block and track with an explicit `margin-right` (0 on the last letter). `letter-spacing` on inline-block letters is applied unpredictably (doubled, or dropped with `text-indent`) and pushes the line off-centre. Measure with `qc.py centre`.
 
 ## 5. Catalog of moves
@@ -66,4 +66,4 @@ How things should move. Adapted from Movez's "How to build motion design studio 
 
 ## 6. Banned defaults
 
-Centred title on a gradient; everything fading in; corner labels and frame borders as decoration; glow on UI chrome; generic particle bursts; oversized UI text on a laptop; `will-change` on anything the camera scales (blurry text); a dead beat where nothing happens; sine wobble on UI; the same transition at every cut.
+A look nobody chose (the template's, or the last film's by default); centred title on a gradient; everything fading in; corner labels and frame borders as decoration; glow on UI chrome; generic particle bursts; oversized UI text on a laptop; `will-change` on anything the camera scales (blurry text); a dead beat where nothing happens; sine wobble on UI; the same transition at every cut.

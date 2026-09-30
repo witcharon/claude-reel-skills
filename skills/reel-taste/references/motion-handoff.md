@@ -1,6 +1,6 @@
 # What the motion layer can build (write scripts for it)
 
-The edit is built frame by frame on top of the take: tracked screens, mattes, HTML/Canvas type and HUD, occasionally three.js, and synthesized sound mixed with the take's own audio. Scripts should ask for things in this list and supply what each needs.
+With footage, the edit is built frame by frame on top of the take: tracked screens, mattes, HTML/Canvas type and HUD, occasionally three.js, and synthesized sound mixed with the take's own audio. Without footage, every scene is drawn in code (SVG, canvas, three.js): the product's UI rebuilt as components, generative patterns, characters. Scripts should ask for things in this list and supply what each needs.
 
 ## Reliable moves and what they need from the footage
 
@@ -15,12 +15,11 @@ The edit is built frame by frame on top of the take: tracked screens, mattes, HT
 | Hiding cuts | Darkness, flash or whip frames around each cut |
 | 3D product shot (reveal, lid close) | Nothing, but use it sparingly; full-CG reels flopped |
 
-## On-screen typography defaults
+## Look and type
 
-- Titles: Inter 900 italic, lowercase, tight tracking, sentences ending with a period ("close the lid."). Words enter one at a time on the beat.
-- UI/HUD/logs: JetBrains Mono, realistic sizes. Laptop UI at real terminal size (~90 columns), never oversized.
-- End card: wide-tracked caps title, brand line, one-sentence product description, CTA pill, fine print.
-- Black text on bright skies and walls; white with a soft shadow elsewhere.
+- There are no typography defaults. Palette, type, texture and transitions come from the film's look direction, which motion-studio turns into `style_guide.md` (from a reference's grammar, or reasoned from the brief).
+- What holds for any look: words enter on the beat, one idea at a time; the product's UI at a real, readable size (laptop UI at real terminal size, ~90 columns, never oversized); contrast before style.
+- The end card is designed in the film's look: the brand, one line about the product, the CTA.
 
 ## Platform safe zones (1080×1920)
 
@@ -44,4 +43,4 @@ The edit is built frame by frame on top of the take: tracked screens, mattes, HT
 
 ## CTA
 
-- When links go out through a comment keyword (ManyChat-style), the video says "check the caption for the link" and the caption says "Comment <WORD> and we'll DM you the link". Don't lead with the URL.
+- When links go out through a comment keyword (ManyChat-style), the video either says "check the caption for the link" or names the keyword itself (comment “motion”), and the caption says "Comment <WORD> and we'll DM you the link". Don't lead with the URL.

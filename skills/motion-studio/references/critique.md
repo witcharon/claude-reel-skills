@@ -22,8 +22,11 @@ Open every image and look at it properly.
 6. Composition and safe area: centred on 540, nothing in the danger zones
 7. Brand and product accuracy: the real UI at a real size, honest states
 8. Sound sync: effects on contact frames, the structure audible in the section levels
+9. Look: every frame belongs to the film's `style_guide.md`, and nothing reads as a default
 
 ## Hunt specifically for
+- A frame that breaks the style guide, or looks like the template or the last film
+- Decorative corner labels and frame borders that carry no information
 - Text overlapping during swaps, or two titles on screen at once
 - Anything sliding linearly instead of springing
 - A frame with the previous scene's plate at a cut (strip every cut)
@@ -34,4 +37,4 @@ Open every image and look at it properly.
 - Blurry scaled text (`will-change`, scaling a bitmap)
 
 ## Then
-Write the three worst problems with timestamps, fix them, re-render only the affected stills or seconds, and score again. Stop when every score is 8+, then run the full render and repeat the look on the final.
+Write the scores and the three worst problems with timestamps in `out/review_log.md`, fix them, re-render only the affected stills or seconds, and score again. Stop when every score is 8+, then run the full render and repeat the look on the final.

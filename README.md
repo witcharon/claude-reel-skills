@@ -1,29 +1,30 @@
 # Claude reel skills
 
-Two [Claude skills](https://docs.claude.com/en/docs/claude-code/skills) for making short product reels (Instagram Reels, TikTok, YouTube Shorts). AI-generated footage carries the action, and a motion layer rendered from code carries the product.
+Two [Claude skills](https://docs.claude.com/en/docs/claude-code/skills) for making short product videos (Instagram Reels, TikTok, YouTube Shorts, launch films): pure motion graphics made in code, or AI-generated footage with a motion layer on top that carries the product. Neither skill has a house style: every film gets its own look, taken from a reference's grammar or reasoned from the brief.
 
 | Skill | Job | In | Out |
 |---|---|---|---|
-| [`reel-taste`](skills/reel-taste) | Idea to script, with taste | a product and what it does | a concept, a video-model prompt, motion notes, a caption |
-| [`motion-studio`](skills/motion-studio) | Script to finished film | a generated take and the motion notes | a 1080x1920 MP4 with the real UI, type, sound and an end card |
+| [`reel-taste`](skills/reel-taste) | Idea to script, with taste | a product and what it does | a concept, a look direction, motion notes, a video-model prompt (when there's footage), a caption |
+| [`motion-studio`](skills/motion-studio) | Script to finished film | the brief, and a generated take if there is one | `style_guide.md`, `shotlist.md` and a 1080x1920 MP4: pure motion graphics or motion on footage |
 
 They are built to be used together, and each one refers to the other. **reel-taste** decides *what* the video is and writes a prompt a video model can render, plus motion notes the edit can hold on to. **motion-studio** takes that package as its brief and *executes* it: it tracks the product's real UI onto screens, animates type on springs, scores the sound on the same timeline, and critiques its own frames until they pass. Either one works alone, but the handoff between them is the point.
 
 ```
- product ──► reel-taste ──► video prompt ──► Loomshot (Seedance 2.5) ──► take.mp4
-                 │                                                          │
-                 └──────────── motion notes ────────► motion-studio ◄───────┘
-                                                            │
-                                                            ▼
-                                                    reel.mp4 (+ score, QC)
+ product + reference ──► reel-taste ──► concept, look direction, motion notes ──► motion-studio
+                              │                                                   │  style_guide.md
+                              └── video prompt ──► Loomshot (Seedance 2.5) ──►    │  shotlist.md  (your OK)
+                                  (only for films with footage)      take.mp4 ──► │  render, sound, QC
+                                                                                  ▼
+                                                                          film.mp4
 ```
 
 ## reel-taste: ideas and scripts with taste
 
-A creative director for reels whose footage is generated from a prompt. It finds the product's *verb*, the one thing it makes possible, and puts that verb at the turning point of a story. It spreads ideas across genres and devices on purpose, so you don't get the same recipe twice, and it holds every idea to a taste bar: it reads in one second with the sound off, the details are specific rather than hype, there is one signature move, the footage looks real rather than CG, and the claims are honest.
+A creative director for short product videos, with generated footage or as pure motion graphics. It finds the product's *verb*, the one thing it makes possible, and puts that verb at the turning point of a story. It spreads ideas across genres and devices on purpose, so you don't get the same recipe twice, and it holds every idea to a taste bar: it reads in one second with the sound off, the details are specific rather than hype, there is one signature move, the footage looks real rather than CG, and the claims are honest.
 
 For the chosen idea it delivers:
-- a single multi-shot prompt the video model can render consistently (timestamped actions, consistency anchors, cuts placed where an edit can hide them, an AVOID line);
+- a look direction: the reference and the grammar to take from it (never its content), or the look reasoned from the product, the audience and the signature move;
+- for films with footage, a single multi-shot prompt the video model can render consistently (timestamped actions, consistency anchors, cuts placed where an edit can hide them, an AVOID line);
 - motion notes as a `time | picture | on screen | sound` table, with the signature move, the safe zones and where the CTA goes;
 - what to check in the generated take before editing, and a caption.
 
@@ -34,15 +35,18 @@ Those motion notes are exactly the brief **motion-studio** expects. See [`skills
 A film here is a program: an HTML page with `window.renderAt(t)` that paints the exact frame for any moment. Headless Chromium renders it frame by frame and ffmpeg encodes it. Because every frame is a pure function of time, any fix is an edit plus a re-render, and Claude can look at any frame it made.
 
 What the pipeline does:
-- **Ingest:** reads the take and makes a labelled contact sheet, plus the cuts, dark runs and audio profile.
-- **Retime:** puts story beats on a grid, with speed ramps (shutter blend) and slow motion (interpolated frames).
-- **Screen replacement:** tracks screens (LK flow + RANSAC, hand-marked quads for fast swings) and cuts out hands so fingers stay in front of the UI.
+- **Brief:** a reel-taste package, or reel-taste's process run first; it asks when the deliverables are ambiguous (one film or two, footage or not) and which language the on-screen copy is in.
+- **Look:** `style_guide.md` for this film. With a reference, frames are extracted (`ffmpeg fps=2`) and its grammar is written down: palette in hex, type, shot lengths, transitions, texture. Without one, the look is reasoned from the brief. The product's real logo, colours, fonts and UI are collected first.
+- **Shot list:** `shotlist.md` on the beat grid, shown for an OK before any code. A rejection rewrites the shot list, not the code.
+- **Ingest (footage):** reads the take and makes a labelled contact sheet, plus the cuts, dark runs and audio profile.
+- **Retime (footage):** puts story beats on a grid, with speed ramps (shutter blend) and slow motion (interpolated frames).
+- **Screen replacement (footage):** or, in pure motion films, the product's UI rebuilt as components; tracks screens (LK flow + RANSAC, hand-marked quads for fast swings) and cuts out hands so fingers stay in front of the UI.
 - **Motion:** closed-form springs, velocity-matched seams, kinetic type, a HUD, and real UI at a real size.
 - **Sound:** synthesized score and sound design with perspective, vacuums and tape-stops, mixed to −15 LUFS.
 - **Delivery:** motion blur from subframes; on Apple Silicon the Apple Media Engine (VideoToolbox) encodes automatically.
 - **Critique:** a loop over the rendered frames (contact sheets, strips around cuts, phone-size pass, safe-zone overlay, centring measured in pixels) that scores 1–10 and keeps fixing until every score is 8+.
 
-It takes **reel-taste**'s package as its brief. Without one, it writes the motion notes itself first. It asks which language the on-screen copy should be in when the brief doesn't say. See [`skills/motion-studio`](skills/motion-studio).
+It takes **reel-taste**'s package as its brief, and calls on reel-taste's process when there is none, so the concept always gets the taste pass. See [`skills/motion-studio`](skills/motion-studio).
 
 ## The footage: generated with Loomshot
 
@@ -69,6 +73,7 @@ We wanted a repeatable studio that avoids both, so the work is split into taste 
   - sound synthesized on the picture's timeline and a beat grid;
   - the critique loop that scores stills until everything is 8+;
   - the director's-brief skeleton and "package the pipeline as a skill";
+  - its section 05, reference → frames → `style_guide.md` → shot list → OK, then code ("take the grammar, never the content"), which became motion-studio's look step;
   - generate-then-trace: a video model renders the physical action and code draws the layer the viewer reads.
 - **[HyperFrames](https://github.com/heygen-com/hyperframes)** by HeyGen (Apache-2.0). Its `motion-doctrine`, `cut-the-curve`, `seam-craft` and `oversized-cursor` agent skills shaped `references/doctrine.md`:
   - the vector law for seams (exit on power4-in, enter on power4-out, cut mid-motion);
@@ -76,6 +81,7 @@ We wanted a repeatable studio that avoids both, so the work is split into taste 
   - springs instead of easing curves, and the oversized-cursor move.
   - We adapted the ideas in our own words and code; no HyperFrames code is included.
 - **[claude-animation-skill](https://github.com/buildwithhanif/claude-animation-skill)** by buildwithhanif (MIT). From it we took the habit of looking: contact sheets and 12-frame strips around fast moments (`qc.py sheet` / `strip`), and sound synthesized from the same timeline as the picture.
+- **The films the article embeds.** We downloaded and read all 19 frame by frame (UI showcases, product launches, showreels, music videos, story shorts). What they share, and what is already turning into a cliché, is in `skills/motion-studio/references/look.md`.
 - **Also studied, not used directly:** [PDoomVideo](https://github.com/JohnHeibel/PDoomVideo), [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase), [Battle-of-Austerlitz-Film](https://github.com/WinterArc21/Battle-of-Austerlitz-Film), [awesome-ai-motion](https://github.com/guanmo-ai/awesome-ai-motion) and [awesome-opus-5-5-videos](https://github.com/athemeroy/awesome-opus-5-5-videos).
 - **reel-taste** comes from our own production of the Lidlezz reels: what landed, what flopped and why (see its [case studies](skills/reel-taste/references/case-studies.md)). It was written and tested with Anthropic's [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator), with eval prompts run with and without the skill.
 
