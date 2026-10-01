@@ -11,7 +11,7 @@ Without it, a model falls back to its default: centred text on a gradient, every
 - **A frame:** say what to take (palette, type, grain, layout) and what not to take (the subject, the logo).
 - **A library** (images, past films): write the guide from what the pieces share, then name what this film adds.
 
-Take the **grammar** of the reference (pacing, type, palette logic, transitions, texture), never its content, logos or characters. A re-run of the same brief with a different library gives a completely different film; that is the point.
+Take the **grammar** of the reference (pacing, type, palette logic, transitions, texture), never its content, logos or characters. Then match its **craft level**: the depth, lighting, materials and drawing quality that make it look the way it does. Taking a reference's colour flips without its 3D mascots and shadows gives a cheaper film than either. If its craft is out of reach in code, pick a grammar you can execute at that level instead. A re-run of the same brief with a different library gives a completely different film; that is the point.
 
 **Reasoning, when there is none.** There is no menu to pick from. Reason from the brief and write the reasoning down, in a few lines:
 - What does the product feel like to use? The look should feel like that (precise, playful, heavy, quiet, tactile).
@@ -20,7 +20,11 @@ Take the **grammar** of the reference (pacing, type, palette logic, transitions,
 - What must be read? The copy, the UI, a number. Pick type that carries it at phone size.
 - What would the obvious choice be? Name it, then decide whether to use it or beat it.
 
-**A project whose style has settled.** Brands grow a style over time. When the project already has a `style_guide.md`, start from it and write what this film keeps and what it changes. Keeping is fine when it is a decision; drifting into the same film again is not.
+**The brand's own films and assets come first.** Before deciding anything, find what the brand has already made: earlier films in the project (the promo root's MP4s, `src/*/`), its site, its app. Make a contact sheet of the best earlier film and look at it, and list what can be reused: a 3D device model, the signature lockup and end card, the colour family, the type pairing, a mascot or icon. Two rules follow:
+- **The signature carries over at the same quality or better.** If an earlier film ends on "Close the lid. *Keep it running.*" as a tight lockup on a gradient, this film's version may be restaged, never redrawn worse. Reuse the code when you can.
+- **A reference changes the grammar, not the brand.** A reference tells you how to pace, cut and stage; the brand's signature, colours and devices stay recognisable.
+
+**A project whose style has settled.** Brands grow a style over time. When the project already has a `style_guide.md` or earlier films, start from them and write what this film keeps and what it changes. Keeping is fine when it is a decision; drifting into the same film again is not.
 
 **The product's own assets.** Whatever the look, the product appears as itself: collect its real logo, colours, fonts and UI (Playwright captures from its site, or files the user gives) into `assets/`, list what you found, and animate the real thing. Never redraw a product's UI from imagination.
 
@@ -29,6 +33,7 @@ Take the **grammar** of the reference (pacing, type, palette logic, transitions,
 ```markdown
 # <film>: style guide
 Source: <reference(s): what to take / not take>   or: <the reasoning, in 3-5 lines>
+Brand: <earlier films looked at>; <assets reused (device model, signature lockup, end card)>
 
 ## Palette
 <hex values with roles: ground, ink, accent, UI>; how it changes across scenes (a new ground per scene? a flip on the drop?)
@@ -42,6 +47,9 @@ Fonts: <@fontsource package names to install>
 
 ## Texture and shape
 <flat, grain, halftone, dither, paper, riso, watercolour, glass>; <shape language>; illustration, character or 3D style if any
+
+## Craft
+<frame rate and scale (60 fps · 2x for pure motion graphics)>; <depth: light direction, shadows, glass>; <devices: three.js model, reused from <film> or built>; <illustration style, or none>
 
 ## Motion
 <the signature move>; <transition family: cuts on the beat, zoom-through, morph, wipes, match cuts>; <shot lengths>; <a technique per scene? which?>

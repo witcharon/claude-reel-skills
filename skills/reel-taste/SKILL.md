@@ -65,7 +65,7 @@ Deliver the package in this order:
 
 1. **The generator prompt** (films with footage), in one code block, following `references/seedance-prompting.md`: a single prompt even when there are several shots, consistency anchors, timestamped physical actions, cuts placed where the edit can hide them, an ambient-only AUDIO line and an AVOID line.
 2. **Motion notes**: a table of `time | picture | on screen | sound`. Then the signature move, how the product's verb lands, and where the CTA goes. Respect the safe zones and type rules in `references/motion-handoff.md`.
-3. **Look direction** for motion-studio's `style_guide.md`: the reference and what to take from it (its grammar: pacing, type, palette logic, transitions, texture; never its content, logos or characters), or, without a reference, the look reasoned from the product, the audience and the signature move. Palette, type pairing, texture and transition family in a few lines. No house style: the look is decided for this film.
+3. **Look direction** for motion-studio's `style_guide.md`: first what carries over from the brand's earlier films (its signature lockup and end card, device model, colour family; look at the best one), then the reference and what to take from it (its grammar: pacing, type, palette logic, transitions, texture; never its content, logos or characters), or, without a reference, the look reasoned from the product, the audience and the signature move. Palette, type pairing, texture and transition family in a few lines. No house style: the look is decided for this film.
 4. **What to check in the generated take** (films with footage): the two or three things that must be right before editing (the screen facing the camera, the lion never touching the person, the orange lining consistent across shots).
 5. **Caption** (optional unless asked): short, in the brand's voice, with the CTA (e.g. "Comment LID and we'll DM you the link").
 
@@ -80,7 +80,7 @@ Run through these questions and fix what fails. Don't list them to the user.
 - Is there exactly one signature move, and can I name it in five words?
 - Is every line of on-screen copy specific (numbers, times, names), or is any of it generic hype?
 - Are there at most three big-type moments?
-- Is the look a decision (from a reference or a reason), not a default or the last film's?
+- Is the look a decision (from a reference or a reason), not a default or the last film's? Does the brand's signature come back at least as well made as in its earlier films?
 - Does it differ from the last video in at least three ingredients?
 - Can the generator render every shot as written? No readable text in the footage, no crowd-level consistency, cuts where they can be hidden.
 - Does it claim anything the product doesn't do?

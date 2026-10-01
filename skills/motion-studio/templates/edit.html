@@ -23,8 +23,7 @@ html,body{margin:0;background:#000}
 .title{position:absolute;left:0;width:1080px;text-align:center;font-family:var(--display);font-weight:var(--display-weight);font-style:var(--display-style);
   text-transform:var(--display-case);letter-spacing:var(--display-tracking);line-height:var(--display-leading);white-space:nowrap}
 .title .ln{display:block}
-.title .w{display:inline-block;padding:0 .045em}
-.title .w+.w{margin-left:.2em}
+.title .w{display:inline-block;padding:0 .045em}   /* words are separated by real spaces in the markup: spacing comes from the font */
 #grain{mix-blend-mode:overlay;opacity:0}
 </style>
 </head>
@@ -32,7 +31,7 @@ html,body{margin:0;background:#000}
 <div id="stage">
   <div id="cam" class="full"><img id="plate"></div>
   <div class="title" style="top:900px;font-size:96px" data-out="2.2">
-    <span class="ln"><span class="w" data-at=".3">first</span><span class="w" data-at=".45">line</span></span>
+    <span class="ln"><span class="w" data-at=".3">first</span> <span class="w" data-at=".45">line</span></span>
   </div>
   <canvas id="grain" class="full" width="540" height="960"></canvas>
 </div>

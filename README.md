@@ -43,8 +43,8 @@ What the pipeline does:
 - **Screen replacement (footage):** or, in pure motion films, the product's UI rebuilt as components; tracks screens (LK flow + RANSAC, hand-marked quads for fast swings) and cuts out hands so fingers stay in front of the UI.
 - **Motion:** closed-form springs, velocity-matched seams, kinetic type, a HUD, and real UI at a real size.
 - **Sound:** synthesized score and sound design with perspective, vacuums and tape-stops, mixed to −15 LUFS.
-- **Delivery:** motion blur from subframes; on Apple Silicon the Apple Media Engine (VideoToolbox) encodes automatically.
-- **Critique:** a loop over the rendered frames (contact sheets, strips around cuts, phone-size pass, safe-zone overlay, centring measured in pixels) that scores 1–10 and keeps fixing until every score is 8+.
+- **Delivery:** motion blur from subframes; pure motion graphics at 60 fps, drawn at 2x; on Apple Silicon the Apple Media Engine (VideoToolbox) encodes automatically.
+- **Critique:** a loop over the rendered frames (contact sheets, strips around cuts, phone-size pass, safe-zone overlay, centring measured in pixels, a fluidity measure, and a side-by-side with the reference and the brand's best earlier film) that scores 1–10 and keeps fixing until every score is 8+.
 
 It takes **reel-taste**'s package as its brief, and calls on reel-taste's process when there is none, so the concept always gets the taste pass. See [`skills/motion-studio`](skills/motion-studio).
 

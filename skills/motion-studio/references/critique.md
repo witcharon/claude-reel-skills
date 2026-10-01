@@ -10,6 +10,8 @@ python3 $SKILL/scripts/qc.py phone  out/video.mp4            # 360 px wide: does
 python3 $SKILL/scripts/qc.py safe   out/video.mp4 --at <t,t,t>
 python3 $SKILL/scripts/qc.py centre out/video.mp4 --at <t> --band <y0:y1>
 python3 $SKILL/scripts/qc.py loud   out/video.mp4
+python3 $SKILL/scripts/qc.py motion  out/video.mp4                      # fluidity: still frames, jumps, the biggest jumps with times
+python3 $SKILL/scripts/qc.py compare out/video.mp4 --ref <film>.mp4    # side by side with the reference and the brand's best earlier film
 ```
 Open every image and look at it properly.
 
@@ -23,9 +25,16 @@ Open every image and look at it properly.
 7. Brand and product accuracy: the real UI at a real size, honest states
 8. Sound sync: effects on contact frames, the structure audible in the section levels
 9. Look: every frame belongs to the film's `style_guide.md`, and nothing reads as a default
+10. Craft: next to the reference and the brand's best earlier film (`qc.py compare`), does it look as finished: depth, light, materials, drawing, type? Score it against them, not against your intentions.
+11. Fluidity (`qc.py motion`): for motion graphics, few frames sit still outside deliberate holds and no jumps beyond the planned cuts; compare the numbers with the reference's
+
+Score honestly. A score of 8+ means you would put it next to the reference without apology; if you can't say why it's an 8 with the compare sheet open, it isn't one.
 
 ## Hunt specifically for
 - A frame that breaks the style guide, or looks like the template or the last film
+- The brand's signature (lockup, end card, device) looking worse than in its earlier films
+- Flat clipart, shapes without light or shadow, devices built from flat boxes
+- A run of static holds joined by hard cuts in a motion-graphics film
 - Decorative corner labels and frame borders that carry no information
 - Text overlapping during swaps, or two titles on screen at once
 - Anything sliding linearly instead of springing

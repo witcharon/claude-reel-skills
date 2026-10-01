@@ -41,7 +41,7 @@ The best brief is a **[reel-taste](../reel-taste)** package: the concept, the lo
   - `ingest.py`, `plates.py`: the take, the retime and the graded plates;
   - `track_screen.py`, `keys.py`: screens, hands, hue keys, horizons;
   - `audio_kit.py`, `beats.py`, `mux.py`: the sound kit, beat measurement, a true-peak-safe master to −15 LUFS that verifies itself;
-  - `render.mjs`, `qc.py`: the renderer and the looking tools.
+  - `render.mjs`, `qc.py`: the renderer (60 fps · 2x for pure motion graphics) and the looking tools, including `motion` (fluidity) and `compare` (side by side with a reference).
 - `references/`: `look.md` (deciding the look, `style_guide.md`), `doctrine.md` (how things move), `footage.md` (working on generated takes), `sound.md`, `critique.md`.
 
 Requirements: ffmpeg; Python 3.10+ with `numpy scipy opencv-python-headless pillow`; Node 18+ with `playwright-core @fontsource-variable/inter @fontsource/jetbrains-mono`; and Chromium (`npx playwright install chromium`) or Google Chrome.

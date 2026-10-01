@@ -7,8 +7,9 @@ How things should move. Adapted from Movez's "How to build motion design studio 
 2. Seams: the vector law, carriers, causal motion
 3. Performance: no idle wobble, stillness before the climax
 4. Type
-5. Catalog of moves
-6. Banned defaults
+5. Craft: frame rate, depth, devices, drawing, camera
+6. Catalog of moves
+7. Banned defaults
 
 ## 1. Mass
 
@@ -48,9 +49,23 @@ How things should move. Adapted from Movez's "How to build motion design studio 
 - Cascades: a multi-word line uses `stagger(i, 0.06–0.14)`, heavier words taking longer steps. Never let every word land at once.
 - Three big-type moments per film at most. Whisper-size copy has its own power.
 - Contrast before style: dark type on bright grounds, light type on dark ones, and a shadow or plate only when the ground is busy. Measure centring; don't trust `left: 64px; width: 826px` tricks.
+- Word spacing comes from the font: separate word wrappers with a real space, never with margins. Margins on top of the font's own space read as gaps, worst on a serif whose space is narrow.
+- Tracking at display sizes is tight and set per family: a grotesk around −0.045 to −0.05em, a display serif around −0.02 to −0.03em. A serif left at 0 next to a tightly tracked sans looks loose and cheap.
+- A two-line lockup (a sans line over a serif line) leans together: line-height 0.9–1.0, the serif about 1.2x the sans so the x-heights match, both lines at the same visual width or the serif slightly narrower. Set it once, measure it, and reuse it every time the line appears.
 - Letter cascades: wrap each letter in an inline-block and track with an explicit `margin-right` (0 on the last letter). `letter-spacing` on inline-block letters is applied unpredictably (doubled, or dropped with `text-indent`) and pushes the line off-centre. Measure with `qc.py centre`.
 
-## 5. Catalog of moves
+## 5. Craft: frame rate, depth, devices, drawing, camera
+
+The doctrine above makes motion correct; this section makes it look expensive. Pure motion graphics carry the whole film on craft, so it matters more there.
+
+- **Frame rate and resolution.** Footage films follow the take (24 fps). Pure motion graphics render at **60 fps and 2x** (`render.mjs --fps 60 --scale 2 --sub 2`: drawn at 2160x3840, downscaled with Lanczos), which is where the smooth, crisp feel comes from. At 24 fps a motion-graphics film either sits still or jumps.
+- **Keep it moving.** Between beats something is always travelling: a slow camera push or orbit, parallax between layers, a background gradient drifting. A hard cut to a static hold, then another, reads as a slideshow; check it with `qc.py motion`. Hold perfectly still only on purpose (the vacuum before a hit, a final card).
+- **Depth.** Light comes from somewhere: soft contact shadows under objects, a long soft drop shadow under cards, gradients with a direction, glass (backdrop blur, a 1 px inner highlight) where a surface floats over colour. Flat shapes on a flat ground with no shadow read as clipart.
+- **Product devices are real 3D.** A laptop, phone or watch is built in three.js, not stacked CSS boxes: rounded extruded slabs, `MeshPhysicalMaterial` aluminium (metalness 1, roughness ~0.3, light clearcoat), an environment map (`PMREMGenerator` + `RoomEnvironment`), ACES tone mapping, sRGB output, instanced keys, the screen as a `CanvasTexture`, the lid on a hinge pivot, and a real perspective camera that moves. When the project already has a device model, reuse it.
+- **Drawing.** Commit to an illustration style that has its own shading and line (halftone, flat with a shadow colour, line-and-fill, 3D), or don't draw. A cup, a moon and a pillow as single-colour blobs make the whole film look cheap, however good the motion is.
+- **Colour as a family.** Each scene can change colour, but the colours belong to one family with the brand's (shared value range, one accent, deliberate contrast). Unrelated saturated flats one after another feel like a template, unless the reference does exactly that with the craft to carry it.
+
+## 6. Catalog of moves
 
 | Move | What | When |
 |---|---|---|
@@ -64,6 +79,6 @@ How things should move. Adapted from Movez's "How to build motion design studio 
 | World-locked label | A tag stuck to an object in the take, riding its track | Explaining what an object is or does |
 | System state | A CRT-off collapse when something sleeps, a boot-up when it wakes | Machines as characters |
 
-## 6. Banned defaults
+## 7. Banned defaults
 
-A look nobody chose (the template's, or the last film's by default); centred title on a gradient; everything fading in; corner labels and frame borders as decoration; glow on UI chrome; generic particle bursts; oversized UI text on a laptop; `will-change` on anything the camera scales (blurry text); a dead beat where nothing happens; sine wobble on UI; the same transition at every cut.
+A look nobody chose (the template's, or the last film's by default); a brand's signature redrawn worse than in its earlier films; product devices as flat CSS boxes; single-colour clipart; a motion-graphics film rendered at 24 fps; centred title on a gradient; everything fading in; corner labels and frame borders as decoration; glow on UI chrome; generic particle bursts; oversized UI text on a laptop; `will-change` on anything the camera scales (blurry text); a dead beat where nothing happens; sine wobble on UI; the same transition at every cut.
