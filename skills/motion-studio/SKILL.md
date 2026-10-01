@@ -56,7 +56,7 @@ One folder per film, next to the others (e.g. `promo/src/<film>/`), with the fin
 - **Take the grammar, never the content.** From a reference take pacing, type, palette logic and transitions; never its subject, logos, characters or copy.
 - **Pure function of time.** No `Math.random` (use `rng`/`hash`), no timers, no CSS transitions, no state carried between frames. Load images with `setImg` inside the async `renderAt`.
 - **Real UI, real size.** The product's interface comes from what it really shows (captured, or rebuilt faithfully as components), at a realistic size. Never an invented or oversized screen.
-- **Safe area.** Text only between y 250 and 1440; in the right-button band (y 880–1600) keep it within x 190–890; centre on x 540. Measure it (`qc.py centre`), don't eyeball it.
+- **Safe area.** Text only between y 250 and 1440; in the right-button band (y 880–1600) keep it within x 190–890; centre on x 540. Measure it (`qc.py centre`, which measures against the local background; `--save` shows what it measured), don't eyeball it.
 - **Springs on everything that moves** (`SPRING` presets): UI may overshoot a hair, type never does.
 - **One signature move per film.** Everything else in the motion layer serves it.
 - **Craft at the level of the reference and the brand's earlier films.** Pure motion graphics at 60 fps and 2x; devices in real 3D; light, shadow and depth; no flat clipart; the brand's signature never redrawn worse than before.

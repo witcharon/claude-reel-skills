@@ -8,7 +8,7 @@ python3 $SKILL/scripts/qc.py sheet  out/video.mp4            # the whole film, 4
 python3 $SKILL/scripts/qc.py strip  out/video.mp4 --at <t>   # 12 frames around every cut and fast move
 python3 $SKILL/scripts/qc.py phone  out/video.mp4            # 360 px wide: does it read on a phone?
 python3 $SKILL/scripts/qc.py safe   out/video.mp4 --at <t,t,t>
-python3 $SKILL/scripts/qc.py centre out/video.mp4 --at <t> --band <y0:y1>
+python3 $SKILL/scripts/qc.py centre out/video.mp4 --at <t> --band <y0:y1> [--save]   # measured against the local background
 python3 $SKILL/scripts/qc.py loud   out/video.mp4
 python3 $SKILL/scripts/qc.py motion  out/video.mp4                      # fluidity: still frames, jumps, the biggest jumps with times
 python3 $SKILL/scripts/qc.py compare out/video.mp4 --ref <film>.mp4    # side by side with the reference and the brand's best earlier film
@@ -40,6 +40,7 @@ Score honestly. A score of 8+ means you would put it next to the reference witho
 - Anything sliding linearly instead of springing
 - A frame with the previous scene's plate at a cut (strip every cut)
 - Ghosting from subframes picking two plates
+- Doubled or stepped edges on fast moves: strip each fast stretch from `qc.py motion` at full size (`--w 1080`) and judge what you see, then pick the remedy in the doctrine's craft section
 - Mattes that eat a letter or cut a finger
 - Type sitting on busy detail without enough contrast
 - A beat where nothing happens that isn't a deliberate vacuum
