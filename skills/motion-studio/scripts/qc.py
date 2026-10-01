@@ -59,7 +59,7 @@ elif a.cmd == 'centre':
         print(f'{t:.2f}s  band {y0}-{y1}: ' + (f'x {xs.min()}-{xs.max()}  centre {(xs.min() + xs.max()) / 2:.0f} (frame centre 540)' if len(xs) else 'nothing above threshold'))
 elif a.cmd == 'motion':
     # mean absolute change between consecutive frames at 108x192 grey: still frames read as a slideshow, big jumps as stutter
-    fps = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=r_frame_rate', '-of', 'csv=p=0', a.video], capture_output=True, text=True).stdout.strip()
+    fps = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=r_frame_rate', '-of', 'csv=p=0', a.video], capture_output=True, text=True).stdout.split()[0].strip(',')
     num, den = map(float, fps.split('/')); fps = num / den
     raw = subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', a.video, '-vf', 'scale=108:192,format=gray', '-f', 'rawvideo', '-'], capture_output=True).stdout
     f = np.frombuffer(raw, np.uint8).reshape(-1, 192, 108).astype(np.float32); d = np.abs(np.diff(f, axis=0)).mean(axis=(1, 2))
